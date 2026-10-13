@@ -26,6 +26,7 @@ import {
 import AssetMonitor from './AssetMonitor'
 import AssetOverview from './AssetOverview'
 import { AttachmentsPanel, DashboardPanel, ProcessFlowPanel, TagsPanel } from './AssetTabPanels'
+import EdgeCaseOverview from './EdgeCaseOverview'
 import { IncidentPopup, type IncidentItem } from './IncidentPopup'
 import RightSidebar from './RightSidebar'
 
@@ -34,6 +35,7 @@ type Props = {
   customerName?: string
   selectedUnitPath?: string[]
   onSelectSite?: (siteName: string) => void
+  edgeCase?: boolean
 }
 
 const TABS = ['Overview', 'Process Flow', 'Attachments', 'Tags', 'Asset Monitor', 'Dashboard']
@@ -774,7 +776,7 @@ function LastViewedCard({ onOpen }: { onOpen: (item: LastViewedItem) => void }) 
   )
 }
 
-function OverviewTab({ onSelectAsset, onNavigatePath }: { onSelectAsset: (name: string) => void; onNavigatePath: (path: string[]) => void }) {
+function OverviewTab({ onSelectAsset, onNavigatePath, edgeCase }: { onSelectAsset: (name: string) => void; onNavigatePath: (path: string[]) => void; edgeCase: boolean }) {
   const [popupKpi, setPopupKpi] = useState<string | null>(null)
   const [selectedIncident, setSelectedIncident] = useState<IncidentItem | null>(null)
   const [activityIncident, setActivityIncident] = useState<IncidentItem | null>(null)
@@ -821,13 +823,18 @@ function OverviewTab({ onSelectAsset, onNavigatePath }: { onSelectAsset: (name: 
         />
       )}
       {activityTask && <TaskOverlay task={activityTask} onClose={() => setActivityTask(null)} />}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
-        <KpiStatusCard onKpiClick={(name) => { setPopupKpi(name); setSelectedIncident(null); setActivityIncident(null); setActivityTask(null) }} />
-        <IncidentsTrendCard />
-        <LastViewedCard onOpen={openActivity} />
-      </div>
+      <div className={`w-full ${edgeCase ? '' : 'max-w-[1060px] mx-auto'} flex flex-col gap-[15px] shrink-0 grow`}>
+        {edgeCase ? (
+          <EdgeCaseOverview />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
+              <KpiStatusCard onKpiClick={(name) => { setPopupKpi(name); setSelectedIncident(null); setActivityIncident(null); setActivityTask(null) }} />
+              <IncidentsTrendCard />
+              <LastViewedCard onOpen={openActivity} />
+            </div>
 
-      <div className="bg-white border border-gray-200 rounded-md overflow-hidden flex flex-col shrink-0">
+            <div className="bg-white border border-gray-200 rounded-md overflow-hidden flex flex-col shrink-0">
         <div className="px-4 pt-3 pb-2 shrink-0">
           <div className="text-[13px] font-bold text-gray-800 whitespace-nowrap">Assets (10)</div>
         </div>
@@ -925,6 +932,9 @@ function OverviewTab({ onSelectAsset, onNavigatePath }: { onSelectAsset: (name: 
           </table>
         </div>
       </div>
+          </>
+        )}
+      </div>
     </>
   )
 }
@@ -961,7 +971,7 @@ const findNodeByPath = (nodes: TreeNode[], path: string[], depth: number): TreeN
   return null
 }
 
-export default function DashboardPage({ selectedUnitPath }: Props) {
+export default function DashboardPage({ selectedUnitPath, edgeCase = false }: Props) {
   const [tab, setTab] = useState('Overview')
   const [selectedPath, setSelectedPath] = useState<string[]>(() =>
     selectedUnitPath?.length ? [hierarchy.name, ...selectedUnitPath.slice(1)] : [hierarchy.name],
@@ -1018,7 +1028,7 @@ export default function DashboardPage({ selectedUnitPath }: Props) {
       <HierarchyPanel onSelect={navigateTo} selectedUnitPath={selectedUnitPath} selectedPath={selectedPath} collapsed={ahCollapsed} setCollapsed={setAhCollapsed} />
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-white">
-        <div className="px-4 lg:px-6 pt-3 shrink-0">
+        <div className="px-[15px] pt-3 shrink-0">
           <div className="flex items-center gap-1.5 text-[12px] text-gray-500 flex-wrap">
             {ahCollapsed && (
               <button
@@ -1087,7 +1097,7 @@ export default function DashboardPage({ selectedUnitPath }: Props) {
           <div className="border-b border-gray-200 mt-2" />
         </div>
 
-        <div className="px-4 lg:px-6 pt-3 shrink-0 flex items-stretch gap-1.5 flex-wrap border-b border-gray-200 font-semibold">
+        <div className="px-[15px] pt-3 shrink-0 flex items-stretch gap-1.5 flex-wrap border-b border-gray-200 font-semibold">
           {TABS.map((t, i) => (
             <span key={t} className="flex items-stretch gap-1.5">
               {i === 5 && <span className="w-px h-4 bg-gray-300 mx-1 self-center" />}
@@ -1110,12 +1120,12 @@ export default function DashboardPage({ selectedUnitPath }: Props) {
 
         <div
           ref={scrollRef}
-          className={`flex-1 min-h-0 flex flex-col gap-4 ${
-            tab === 'Process Flow' || tab === 'Dashboard' ? 'px-0 py-0 bg-[#F7F9FA]' : 'px-4 lg:px-6 py-4'
+          className={`flex-1 min-h-0 flex flex-col gap-[15px] ${
+            tab === 'Process Flow' || tab === 'Dashboard' ? 'px-0 py-0 bg-[#F7F9FA]' : 'p-[15px] bg-[#F7F9FA]'
           } ${tab === 'Asset Monitor' ? 'overflow-hidden' : 'overflow-y-auto'}`}
         >
-          {isSiteSelected && !KPI_HIDDEN_TABS.includes(tab) && (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 shrink-0">
+          {isSiteSelected && !KPI_HIDDEN_TABS.includes(tab) && !edgeCase && (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-[15px] shrink-0 w-full max-w-[1060px] mx-auto">
               {kpis.map((k) => {
                 const iconMap: Record<string, { icon: React.ReactNode; bg: string }> = {
                   'Power Consumption': {
@@ -1212,6 +1222,7 @@ export default function DashboardPage({ selectedUnitPath }: Props) {
               if (card) navigateTo([...card.path, card.name])
             }}
             onNavigatePath={(path) => navigateTo(path)}
+            edgeCase={edgeCase}
           />
           ) : (
             <Placeholder name={tab} />

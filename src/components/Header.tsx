@@ -19,6 +19,8 @@ type Props = {
   onToggleBu?: () => void
   buGradient?: boolean
   onToggleBuGradient?: () => void
+  edgeCase?: boolean
+  onToggleEdgeCase?: () => void
 }
 
 const compareTypes = [
@@ -55,7 +57,7 @@ const assetGroups: { name: string; children: { name: string; children: { name: s
   ]},
 ]
 
-export default function Header({ customer, customers, isDashboard, persona, profileImage, onOpenAICopilot, onOpenSettings, onSwitchCustomer, onSelectPersona, onCompare, buIconVisible, onToggleBu, buGradient, onToggleBuGradient }: Props) {
+export default function Header({ customer, customers, isDashboard, persona, profileImage, onOpenAICopilot, onOpenSettings, onSwitchCustomer, onSelectPersona, onCompare, buIconVisible, onToggleBu, buGradient, onToggleBuGradient, edgeCase, onToggleEdgeCase }: Props) {
   const [profileOpen, setProfileOpen] = useState(false)
   const [customerOpen, setCustomerOpen] = useState(false)
   const [customerQuery, setCustomerQuery] = useState('')
@@ -250,6 +252,20 @@ export default function Header({ customer, customers, isDashboard, persona, prof
                   <span className="text-[13px] text-gray-700 group-hover:text-gray-900 transition-colors">BU Bar gradient background</span>
                 </label>
                 <p className="text-[11px] text-gray-400 mt-1.5 ml-[48px]">Toggle gradient bg for the BU bar. When off, text-only with white background.</p>
+              </div>
+              <div className="mx-3 border-t border-gray-100" />
+              <div className="px-4 py-3">
+                <h4 className="text-[13px] font-semibold text-gray-900 mb-2">Edge case</h4>
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={edgeCase}
+                    onChange={() => onToggleEdgeCase?.()}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span className="text-[13px] text-gray-700 group-hover:text-gray-900 transition-colors">Edge case state</span>
+                </label>
+                <p className="text-[11px] text-gray-400 mt-1.5 ml-[26px]">Show empty-state panels (no KPIs, no incidents, no tasks) in Overview.</p>
               </div>
               <div className="py-1 px-1">
                 <button

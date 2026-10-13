@@ -1,9 +1,8 @@
-import { Building2, Plus } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import AICopilot from './components/AICopilot'
-import BUBar, { type BUItem } from './components/BUBar'
+import AllCustomersPage from './components/AllCustomersPage'
 import CompareView from './components/CompareView'
-import CustomerSidebar from './components/CustomerSidebar'
 import SettingsDrawer from './components/SettingsDrawer'
 import Header from './components/Header'
 import IconSidebar from './components/IconSidebar'
@@ -13,7 +12,7 @@ import CustomerTable from './components/CustomerTable'
 import DashboardPage from './components/DashboardPage'
 import CalendarPage from './components/CalendarPage'
 import ExternalOperatorView from './components/ExternalOperatorView'
-import { budgetUnits, customers, generateSites, unitNames } from './data/dashboard'
+import { customers, generateSites, unitNames } from './data/dashboard'
 import { personaKey, personaNav, type Persona, type PersonaType, type PersonaView } from './data/personas'
 import { defaultTheme, type ThemeConfig } from './data/themes'
 
@@ -51,7 +50,7 @@ function getReadableTextColor(hex: string) {
 
 export default function App() {
   const [iconNav, setIconNav] = useState('home')
-  const [activeBU, setActiveBU] = useState('ums')
+  const [activeBU] = useState('ums')
   const [persona, setPersona] = useState<Persona>({ type: 'internal', view: 'management' })
   const [activeCustomer, setActiveCustomer] = useState('all')
   const [dark, setDark] = useState(false)
@@ -65,6 +64,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profileImage, setProfileImage] = useState<string | undefined>()
   const [theme, setTheme] = useState<ThemeConfig | null>(null)
+  const [edgeCase, setEdgeCase] = useState(false)
 
   const activeTheme = theme ?? defaultTheme
   const themeMatchesMode = activeTheme.dark === dark
@@ -188,6 +188,8 @@ export default function App() {
         onCompare={handleOpenCompare}
         buGradient={buGradient}
         onToggleBuGradient={() => setBuGradient((g) => !g)}
+        edgeCase={edgeCase}
+        onToggleEdgeCase={() => setEdgeCase((e) => !e)}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -196,16 +198,6 @@ export default function App() {
 
         {/* Right side */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* BU bar below header */}
-          {persona.type === 'internal' && persona.view === 'management' && page !== 'dashboard' && page !== 'incidents' && page !== 'tasks' && page !== 'calendar' && page !== 'report' && (
-            <BUBar
-              items={budgetUnits as BUItem[]}
-              active={activeBU}
-              onSelect={setActiveBU}
-              gradient={buGradient}
-            />
-          )}
-
           {/* Content area */}
           {compareView && typeof compareView === 'object' ? (
             <CompareView
@@ -254,12 +246,8 @@ export default function App() {
             </main>
           ) : showInternalOperatorView ? (
             <div className="relative flex flex-1 min-h-0 overflow-hidden">
-              <CustomerSidebar
-                active={activeCustomer}
-                onSelect={setActiveCustomer}
-              />
               <main className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 pt-[15px] pb-0 overflow-y-auto min-h-0 flex flex-col bg-white">
-                <div className="max-w-full sm:max-w-[700px] md:max-w-[900px] lg:max-w-[1050px] xl:max-w-[1200px] min-[1920px]:max-w-[1500px] mx-auto space-y-6 w-full pb-8 shrink-0">
+              <div className="max-w-[1060px] mx-auto space-y-6 w-full pb-8 shrink-0">
                   <ExternalOperatorView
                     customer={currentCustomer ?? customers[0]}
                     onOpenDashboard={openDashboard}
@@ -273,58 +261,30 @@ export default function App() {
               siteName={dashboardSite}
               customerName={currentCustomer?.name ?? 'All customers'}
               selectedUnitPath={selectedUnitPath}
+              edgeCase={edgeCase}
             />
+          ) : activeCustomer === 'all' ? (
+            <AllCustomersPage onOpenDashboard={openDashboard} />
           ) : (
       <div className="relative flex flex-1 min-h-0 overflow-hidden">
-            {/* Customers sidebar - internal only */}
-            {persona.type !== 'external' && (
-            <CustomerSidebar
-              active={activeCustomer}
-              onSelect={setActiveCustomer}
-            />
-            )}
-
             {/* Main content */}
             <main className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 pt-[15px] pb-0 overflow-y-auto min-h-0 flex flex-col bg-white">
               <div className="max-w-full sm:max-w-[700px] md:max-w-[900px] lg:max-w-[1050px] xl:max-w-[1200px] min-[1920px]:max-w-[1500px] mx-auto space-y-6 w-full pb-8 shrink-0">
-                {/* Section header */}
-                {activeCustomer === 'all' ? (
-                  <div className="section-head flex items-center justify-between flex-wrap gap-3" style={{ marginBottom: 14 }}>
-                    <div className="header-title flex items-center gap-2.5">
-                      <div className="header-icon w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 21V7a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v14M12 21v-9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-gray-900 leading-tight">All Customers</h3>
-                        <div className="header-sub text-xs text-gray-500">{customers.length} customers</div>
-                      </div>
+                <div className="header-row flex items-center justify-between flex-wrap gap-3 mb-[15px]">
+                  <div className="header-title flex items-center gap-3">
+                    <div className="header-icon flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                      <Building2 className="w-5 h-5" strokeWidth={1.8} />
                     </div>
-                    {!hidePerformanceMetrics && (
-                    <div className="flex items-center gap-3">
-                      <button className="sidebar-add-btn flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold shadow-sm hover:bg-blue-700 transition-all cursor-pointer">
-                        <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
-                        Add Customer
-                      </button>
-                    </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="header-row flex items-center justify-between flex-wrap gap-3 mb-[15px]">
-                    <div className="header-title flex items-center gap-3">
-                      <div className="header-icon flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600 shrink-0">
-                        <Building2 className="w-5 h-5" strokeWidth={1.8} />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-bold text-gray-900 leading-tight">
-                          {currentLabel}
-                        </h2>
-                        <div className="header-sub text-xs text-gray-500 font-medium mt-0.5">
-                          {currentCustomer?.sites} sites
-                        </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                        {currentLabel}
+                      </h2>
+                      <div className="header-sub text-xs text-gray-500 font-medium mt-0.5">
+                        {currentCustomer?.sites} sites
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Summary cards */}
                 <SummaryCards active={activeCustomer} />
