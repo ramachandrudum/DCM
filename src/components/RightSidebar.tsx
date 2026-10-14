@@ -128,12 +128,12 @@ const toMonitorTask = (a: Alert): MonitorTask => ({
   avatar: a.avatar ?? 'RM',
 })
 
-export default function RightSidebar({ onClose }: { onClose: () => void }) {
+export default function RightSidebar({ onClose, widthClass = 'w-[300px]' }: { onClose: () => void; widthClass?: string }) {
   const [filter, setFilter] = useState('all')
   const [openAlert, setOpenAlert] = useState<Alert | null>(null)
 
   return (
-    <div className="w-[300px] shrink-0 border-l border-gray-200 bg-white flex flex-col min-h-0">
+    <div className={`${widthClass} shrink-0 border-l border-gray-200 bg-white flex flex-col min-h-0`}>
       <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 shrink-0">
         <span className="text-[13px] font-bold text-gray-900">Priority Actions</span>
         <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">

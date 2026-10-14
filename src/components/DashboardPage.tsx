@@ -18,7 +18,6 @@ import {
   assetCards,
   hierarchy,
   kpiStatus,
-  kpis,
   otherSites,
   type NodeStatus,
   type TreeNode,
@@ -29,6 +28,7 @@ import { AttachmentsPanel, DashboardPanel, ProcessFlowPanel, TagsPanel } from '.
 import EdgeCaseOverview from './EdgeCaseOverview'
 import { IncidentPopup, type IncidentItem } from './IncidentPopup'
 import RightSidebar from './RightSidebar'
+import SiteOverview from './SiteOverview'
 
 type Props = {
   siteName: string
@@ -40,8 +40,6 @@ type Props = {
 
 const TABS = ['Overview', 'Process Flow', 'Attachments', 'Tags', 'Asset Monitor', 'Dashboard']
 
-const KPI_HIDDEN_TABS = ['Process Flow', 'Attachments', 'Tags', 'Dashboard', 'Asset Monitor']
-
 function Dot({ status, size = 8 }: { status: NodeStatus; size?: number }) {
   return (
     <span
@@ -51,9 +49,14 @@ function Dot({ status, size = 8 }: { status: NodeStatus; size?: number }) {
   )
 }
 
+const TREE_COL = 14
+const TREE_VLINE = 'absolute w-px bg-gray-200'
+const TREE_HLINE = 'absolute h-px bg-gray-200'
+
 function TreeBranch({
   node,
-  depth,
+  isLast,
+  guides,
   expanded,
   onToggle,
   path,
@@ -63,7 +66,8 @@ function TreeBranch({
   onHideTooltip,
 }: {
   node: TreeNode
-  depth: number
+  isLast: boolean
+  guides: boolean[]
   expanded: Record<string, boolean>
   onToggle: (id: string) => void
   path: string[]
@@ -74,71 +78,70 @@ function TreeBranch({
 }) {
   const hasKids = !!node.children && node.children.length > 0
   const open = !!expanded[node.id]
-  const pad = 4 + depth * 10
   const currentPath = [...path, node.name]
   const isActive = selectedPath.length === currentPath.length && selectedPath.every((s, i) => s === currentPath[i])
-
-  if (node.kind === 'asset') {
-    return (
-      <div
-        onClick={() => onSelect(currentPath)}
-        data-active-node={isActive ? '' : undefined}
-        className={`group flex items-center gap-2 py-1.5 pr-2 rounded-md text-[13px] cursor-pointer ${
-          isActive
-            ? 'theme-primary-text theme-primary-bg-soft font-semibold'
-            : 'text-[var(--theme-text)] hover:bg-gray-100'
-        }`}
-        style={{ paddingLeft: pad }}
-        onMouseEnter={(e) => onShowTooltip(node.name, e.currentTarget)}
-        onMouseLeave={onHideTooltip}
-      >
-        <Dot status={node.status ?? 'off'} />
-        <span className="relative flex-1 min-w-0">
-          <span className="block truncate">{node.name}</span>
-        </span>
-        <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-lg leading-none">⋮</span>
-      </div>
-    )
-  }
+  const isSystem = node.kind === 'system'
+  const isAsset = node.kind === 'asset'
 
   return (
     <div>
       <div
-        className={`group flex items-center gap-2 py-1.5 pr-2 rounded-md text-[13px] ${
+        data-active-node={isActive ? '' : undefined}
+        className={`group flex items-stretch rounded-md text-[13px] ${
           isActive
-            ? 'theme-primary-text font-semibold'
+            ? 'theme-primary-text theme-primary-bg-soft font-semibold'
             : 'text-[var(--theme-text)] hover:bg-gray-50'
         }`}
-        data-active-node={isActive ? '' : undefined}
-        style={{ paddingLeft: node.kind === 'system' ? 35 : pad }}
         onMouseEnter={(e) => onShowTooltip(node.name, e.currentTarget)}
         onMouseLeave={onHideTooltip}
       >
-        {node.kind !== 'system' ? (
+        <span className="flex items-stretch shrink-0">
+          {guides.map((show, i) => (
+            <span key={i} className="relative self-stretch shrink-0" style={{ width: TREE_COL }}>
+              {show && <span className={`${TREE_VLINE} left-1/2 top-0 bottom-0`} />}
+            </span>
+          ))}
           <span
-            onClick={() => hasKids && onToggle(node.id)}
-            className={`shrink-0 ${hasKids ? 'cursor-pointer' : ''}`}
+            className={`relative self-stretch shrink-0 ${hasKids ? 'cursor-pointer' : ''}`}
+            style={{ width: TREE_COL }}
+            onClick={hasKids ? (e) => { e.stopPropagation(); onToggle(node.id) } : undefined}
+            title={hasKids ? (open ? 'Collapse' : 'Expand') : undefined}
           >
-            <ChevronRight
-              className={`w-3 h-3 text-gray-400 transition-transform ${
-                hasKids ? (open ? 'rotate-90' : '') : 'opacity-0'
-              }`}
-            />
+            <span className={`${TREE_VLINE} left-1/2 top-0 h-1/2`} />
+            {!isLast && <span className={`${TREE_VLINE} left-1/2 top-1/2 bottom-0`} />}
+            <span className={`${TREE_HLINE} left-1/2 top-1/2`} style={{ width: TREE_COL / 2 }} />
           </span>
-        ) : null}
+        </span>
         <span
           onClick={() => onSelect(currentPath)}
-          className={`flex-1 min-w-0 cursor-pointer ${node.kind === 'system' ? 'font-semibold' : ''}`}
-          style={node.kind === 'system' ? { fontSize: 10 } : undefined}
+          className="flex items-center gap-2 flex-1 min-w-0 pr-2 py-[3px] cursor-pointer"
         >
-          <span className={`block truncate ${node.kind === 'system' ? 'uppercase' : ''}`}>{node.name}</span>
+          {isAsset && <Dot status={node.status ?? 'off'} />}
+          <span
+            className={`flex-1 min-w-0 truncate ${isSystem ? 'uppercase font-semibold' : ''}`}
+            style={isSystem ? { fontSize: 10 } : undefined}
+          >
+            {node.name}
+          </span>
+          <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-sm leading-none">⋮</span>
         </span>
-        <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-lg leading-none">⋮</span>
       </div>
       {hasKids && open && (
         <div>
-          {node.children!.map((c) => (
-            <TreeBranch key={c.id} node={c} depth={depth + 1} expanded={expanded} onToggle={onToggle} path={currentPath} onSelect={onSelect} selectedPath={selectedPath} onShowTooltip={onShowTooltip} onHideTooltip={onHideTooltip} />
+          {node.children!.map((c, i) => (
+            <TreeBranch
+              key={c.id}
+              node={c}
+              isLast={i === node.children!.length - 1}
+              guides={[...guides, !isLast]}
+              expanded={expanded}
+              onToggle={onToggle}
+              path={currentPath}
+              onSelect={onSelect}
+              selectedPath={selectedPath}
+              onShowTooltip={onShowTooltip}
+              onHideTooltip={onHideTooltip}
+            />
           ))}
         </div>
       )}
@@ -150,12 +153,10 @@ function HierarchyPanel({ onSelect, selectedUnitPath, selectedPath, collapsed, s
   const [menuOpen, setMenuOpen] = useState(false)
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    HVAC: true,
-    Compressors: true,
-    pcs: true,
-    scs: true,
-    cs1: true,
-    cs2: true,
+    pvc: true,
+    carbide: true,
+    caustic: true,
+    utilities: true,
   })
   const [query, setQuery] = useState('')
   const asideRef = useRef<HTMLElement>(null)
@@ -265,7 +266,7 @@ function HierarchyPanel({ onSelect, selectedUnitPath, selectedPath, collapsed, s
       <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-3">
         <div
           onClick={() => onSelect([hierarchy.name])}
-          className={`flex items-center gap-2 py-1.5 px-2 rounded-md text-[13px] cursor-pointer ${
+          className={`flex items-center gap-2 py-[3px] px-2 rounded-md text-[13px] cursor-pointer ${
             selectedPath.length === 1
               ? 'font-semibold theme-primary-text theme-primary-bg-soft'
               : 'font-semibold text-[var(--theme-text)] hover:bg-gray-50'
@@ -274,11 +275,12 @@ function HierarchyPanel({ onSelect, selectedUnitPath, selectedPath, collapsed, s
           <MapPin className="w-3.5 h-3.5 shrink-0" />
           <span className="flex-1 truncate">{hierarchy.name}</span>
         </div>
-        {hierarchy.children!.map((unit) => (
+        {hierarchy.children!.map((unit, i) => (
           <TreeBranch
             key={unit.id}
             node={unit}
-            depth={1}
+            isLast={i === hierarchy.children!.length - 1}
+            guides={[]}
             expanded={expanded}
             onToggle={toggle}
             path={[hierarchy.name]}
@@ -613,10 +615,10 @@ type LastViewedItem = {
 }
 
 const lastViewed: LastViewedItem[] = [
-  { type: 'asset', title: 'Chiller 10', sub: 'Risk Score : 89.6% ▲ 10%', path: ['Nestle UAE', 'HVAC', 'Primary Cooling Water System'] },
-  { type: 'incident', time: '02/08/2026, 9:00 am', title: 'Compressor Specific Power High', sub: 'Compressor 3 Specific Power : 2.23kW/CFM ▲10%', severity: 'critical', path: ['Nestle UAE', 'HVAC', 'Chiller 10'], kpiLabel: 'Compressor 3 Specific Power', kpiValue: '2.23', kpiUnit: 'kW/CFM', kpiDelta: '▲10%' },
-  { type: 'task', title: 'Inspect Cooling Tower Fans', sub: 'Overdue by : 1d 4h', avatar: 'AJ', path: ['Nestle UAE', 'HVAC', 'Cooling Tower A'] },
-  { type: 'incident', time: '02/08/2026, 9:00 am', title: 'Compressor Specific Power High', sub: 'Compressor 3 Specific Power : 2.23kW/CFM ▲10%', severity: 'warning', path: ['Nestle UAE', 'HVAC', 'Chiller 10'], kpiLabel: 'Specific Power', kpiValue: '2.10', kpiUnit: 'kW/CFM', kpiDelta: '▲8%' },
+  { type: 'asset', title: 'Chiller 10', sub: 'Risk Score : 89.6% ▲ 10%', path: ['DCM Kota', 'Utilities & Offsites', 'Primary Cooling Water System'] },
+  { type: 'incident', time: '02/08/2026, 9:00 am', title: 'Compressor Specific Power High', sub: 'Compressor 3 Specific Power : 2.23kW/CFM ▲10%', severity: 'critical', path: ['DCM Kota', 'Carbide Plant', 'Compressor 2'], kpiLabel: 'Compressor 3 Specific Power', kpiValue: '2.23', kpiUnit: 'kW/CFM', kpiDelta: '▲10%' },
+  { type: 'task', title: 'Inspect Cooling Tower Fans', sub: 'Overdue by : 1d 4h', avatar: 'AJ', path: ['DCM Kota', 'Utilities & Offsites', 'Cooling Tower A'] },
+  { type: 'incident', time: '02/08/2026, 9:00 am', title: 'Compressor Specific Power High', sub: 'Compressor 3 Specific Power : 2.23kW/CFM ▲10%', severity: 'warning', path: ['DCM Kota', 'Carbide Plant', 'Compressor 2'], kpiLabel: 'Specific Power', kpiValue: '2.10', kpiUnit: 'kW/CFM', kpiDelta: '▲8%' },
 ]
 
 const findPathByName = (nodes: TreeNode[], name: string, prefix: string[] = []): string[] | null => {
@@ -982,7 +984,6 @@ export default function DashboardPage({ selectedUnitPath, edgeCase = false }: Pr
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const isAssetSelected = selectedPath.length >= 4
-  const isSiteSelected = selectedPath.length >= 1
 
   const navigateTo = (path: string[]) => {
     const changed = path.length !== selectedPath.length || path.some((name, i) => name !== selectedPath[i])
@@ -1124,78 +1125,6 @@ export default function DashboardPage({ selectedUnitPath, edgeCase = false }: Pr
             tab === 'Process Flow' || tab === 'Dashboard' ? 'px-0 py-0 bg-[#F7F9FA]' : 'p-[15px] bg-[#F7F9FA]'
           } ${tab === 'Asset Monitor' ? 'overflow-hidden' : 'overflow-y-auto'}`}
         >
-          {isSiteSelected && !KPI_HIDDEN_TABS.includes(tab) && !edgeCase && (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-[15px] shrink-0 w-full max-w-[1060px] mx-auto">
-              {kpis.map((k) => {
-                const iconMap: Record<string, { icon: React.ReactNode; bg: string }> = {
-                  'Power Consumption': {
-                    bg: 'bg-amber-50',
-                    icon: (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                      </svg>
-                    ),
-                  },
-                  'Thermal Consumption': {
-                    bg: 'bg-orange-50',
-                    icon: (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-600">
-                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-                      </svg>
-                    ),
-                  },
-                  'Water Consumption': {
-                    bg: 'bg-blue-50',
-                    icon: (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-                      </svg>
-                    ),
-                  },
-                  'GHG Emissions': {
-                    bg: 'bg-gray-100',
-                    icon: (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
-                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" />
-                      </svg>
-                    ),
-                  },
-                  'Savings': {
-                    bg: 'bg-green-50',
-                    icon: (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
-                        <line x1="12" y1="1" x2="12" y2="23" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                      </svg>
-                    ),
-                  },
-                }
-                return (
-                  <div key={k.label} className="bg-white border border-gray-200 rounded-md pt-3 px-4 overflow-hidden flex flex-col">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
-                      <span className={`inline-flex items-center justify-center w-[22px] h-[22px] rounded ${iconMap[k.label].bg}`}>
-                        {iconMap[k.label].icon}
-                      </span>
-                      {k.label}
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className="text-2xl font-bold text-gray-900">
-                        {k.value}
-                        <span className="text-[11px] font-medium text-gray-400 ml-0.5">{k.unit}</span>
-                      </span>
-                      <span className="text-[11px] font-bold" style={{ color: k.deltaColor }}>{k.delta}</span>
-                    </div>
-                    <div className="mt-auto -mx-4">
-                      <svg viewBox="0 0 220 26" preserveAspectRatio="none" className="w-full h-[26px] block">
-                        <path d={`${k.path} L220,26 L0,26 Z`} fill={k.color} opacity="0.15" />
-                        <path d={k.path} fill="none" stroke={k.color} strokeWidth="1.5" strokeLinejoin="miter" />
-                      </svg>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
           {tab === 'Asset Monitor' ? (
             <AssetMonitor
               assets={monitorAssetList}
@@ -1216,14 +1145,22 @@ export default function DashboardPage({ selectedUnitPath, edgeCase = false }: Pr
           ) : isAssetSelected ? (
             <AssetOverview />
           ) : tab === 'Overview' ? (
-            <OverviewTab
-            onSelectAsset={(name) => {
-              const card = assetCards.find((a) => a.name === name)
-              if (card) navigateTo([...card.path, card.name])
-            }}
-            onNavigatePath={(path) => navigateTo(path)}
-            edgeCase={edgeCase}
-          />
+            selectedPath.length === 1 && !edgeCase ? (
+              <SiteOverview
+                onViewAllAssets={() => setTab('Asset Monitor')}
+                onViewAllIncidents={() => setRightSidebarOpen(true)}
+                onViewAllTasks={() => setTab('Dashboard')}
+              />
+            ) : (
+              <OverviewTab
+                onSelectAsset={(name) => {
+                  const card = assetCards.find((a) => a.name === name)
+                  if (card) navigateTo([...card.path, card.name])
+                }}
+                onNavigatePath={(path) => navigateTo(path)}
+                edgeCase={edgeCase}
+              />
+            )
           ) : (
             <Placeholder name={tab} />
           )}
