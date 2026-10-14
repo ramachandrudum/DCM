@@ -87,6 +87,7 @@
   background-color: #374151;
 }
 
+.theme-root .bg-\[\#F7F9FA\],
 .theme-root .bg-\[\#F8FAFC\],
 .theme-root .bg-\[\#F9FAFC\] {
   background-color: var(--theme-background);
@@ -443,6 +444,10 @@ html, body, #root {
   background: var(--theme-card);
 }
 
+.dark .bg-\[\#F7F9FA\] {
+  background: var(--theme-background);
+}
+
 .dark .bg-\[\#F8FAFC\] {
   background: var(--theme-background);
 }
@@ -475,8 +480,13 @@ html, body, #root {
 }
 
 .dark .bg-purple-50,
-.dark .bg-indigo-50 {
+.dark .bg-indigo-50,
+.dark .bg-sky-50 {
   background-color: var(--status-info-surface);
+}
+
+.dark .bg-slate-100 {
+  background-color: var(--theme-surface-hover);
 }
 
 .dark .bg-amber-50,
@@ -515,8 +525,13 @@ html, body, #root {
 
 .dark .text-purple-500,
 .dark .text-purple-600,
-.dark .text-purple-700 {
+.dark .text-purple-700,
+.dark .text-sky-500 {
   color: var(--status-info-text) !important;
+}
+
+.dark .text-slate-500 {
+  color: var(--theme-muted) !important;
 }
 
 .dark .text-amber-500,

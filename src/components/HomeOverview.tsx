@@ -16,6 +16,7 @@ import {
   energyTrends,
   healthLegend,
   plantCards,
+  priorityMatrixColors,
   siteKpis,
   sparkPath,
   type PlantCardData,
@@ -23,9 +24,9 @@ import {
 import EdgeCaseOverview from './EdgeCaseOverview'
 
 const STATUS_BADGE: Record<string, { label: string; fg: string; bg: string; dot: string }> = {
-  Running: { label: 'Running', fg: '#047857', bg: '#ECFDF5', dot: '#10B981' },
-  Attention: { label: 'Attention', fg: '#B45309', bg: '#FFFBEB', dot: '#F59E0B' },
-  Offline: { label: 'Offline', fg: '#B91C1C', bg: '#FEF2F2', dot: '#EF4444' },
+  Running: { label: 'Running', fg: '#047857', bg: '#ECFDF5', dot: '#28A745' },
+  Attention: { label: 'Attention', fg: '#B45309', bg: '#FFFBEB', dot: priorityMatrixColors.medium },
+  Offline: { label: 'Offline', fg: '#B91C1C', bg: '#FEF2F2', dot: priorityMatrixColors.high },
 }
 
 function Donut({
@@ -169,7 +170,7 @@ function EnergyConsumptionCard() {
   const k = siteKpis
   const [tab, setTab] = useState<'Overview' | 'Total' | 'Specific'>('Overview')
   const powerColor = '#2563EB'
-  const specificColor = '#10B981'
+  const specificColor = '#28A745'
   return (
     <div className="bg-white border border-gray-200 rounded-[3px] px-4 py-3 shrink-0 w-[236px] flex flex-col">
       <div className="text-[12px] font-bold text-gray-800">Energy Consumption</div>
@@ -250,7 +251,7 @@ function SiteAvailabilityCard() {
     <div className="bg-white border border-gray-200 rounded-[3px] px-4 py-3 shrink-0">
       <div className="text-[12px] font-bold text-gray-800 mb-2">Site Availability</div>
       <div className="flex items-center gap-4">
-        <Donut segments={[{ label: 'Available', value: 92.7, color: '#10B981' }, { label: 'Maintenance', value: 5.3, color: '#F59E0B' }, { label: 'Down', value: 2.0, color: '#EF4444' }]} size={88} thickness={14} gap={4} centerValue="92.7%" centerLabel="Available" />
+        <Donut segments={[{ label: 'Available', value: 92.7, color: '#28A745' }, { label: 'Maintenance', value: 5.3, color: priorityMatrixColors.medium }, { label: 'Down', value: 2.0, color: priorityMatrixColors.high }]} size={88} thickness={14} gap={4} centerValue="92.7%" centerLabel="Available" />
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -327,7 +328,7 @@ function KpiBanner() {
 
 function PlantRow({ plant, onOpenSite }: { plant: PlantCardData; onOpenSite?: (siteName: string) => void }) {
   const badge = STATUS_BADGE[plant.status]
-  const trendColor = plant.status === 'Running' ? '#10B981' : '#F59E0B'
+  const trendColor = plant.status === 'Running' ? '#28A745' : priorityMatrixColors.medium
   const thumbTint = plant.status === 'Running' ? 'from-emerald-600/70 via-emerald-500/30 to-slate-700/60' : 'from-amber-500/70 via-amber-400/30 to-slate-700/60'
   return (
     <div className="border border-gray-200 rounded-[3px] overflow-hidden bg-white flex items-stretch">
@@ -441,7 +442,7 @@ function PlantMapHero() {
       />
       <div className="absolute inset-0 pointer-events-none z-40" onClick={() => setOpenId(null)}>
         {plantCards.map((p) => {
-          const dotColor = p.status === 'Running' ? '#10B981' : '#F59E0B'
+          const dotColor = p.status === 'Running' ? '#28A745' : priorityMatrixColors.medium
           const top = 30 + ((p.map.y - 34) / 30) * 50
           const below = top < 55
           return (
@@ -463,7 +464,7 @@ function PlantMapHero() {
                   style={{ background: dotColor }}
                 />
               </button>
-              <span className="absolute left-1/2 -translate-x-1/2 top-4 px-1.5 py-0.5 rounded bg-white/90 border border-gray-200 text-[9px] font-bold text-gray-700 whitespace-nowrap shadow-sm">
+              <span className="absolute left-1/2 -translate-x-1/2 top-4 px-1.5 py-0.5 rounded bg-blue-600 border border-blue-700 text-[9px] font-bold text-white whitespace-nowrap shadow-sm">
                 {p.name}
               </span>
               {openId === p.id && (
@@ -494,19 +495,19 @@ export default function HomeOverview({ onOpenSite, edgeCase = false }: { onOpenS
         <div className="relative w-full">
           <PlantMapHero />
 
-          <div className="absolute inset-x-0 top-0 pt-[5px] pl-[5px] pr-[5px] pb-[45px] z-20 bg-gradient-to-b from-black/85 via-black/50 to-transparent">
+          <div className="absolute inset-x-0 top-0 p-[15px] z-20 bg-gradient-to-b from-black/85 via-black/50 to-transparent">
             <Toolbar />
           </div>
         </div>
 
-        <div className="relative z-20 px-5 -mt-[25px] flex flex-nowrap items-stretch gap-[15px]">
+        <div className="relative z-30 px-5 -mt-[25px] flex flex-nowrap items-stretch gap-[15px]">
           <AssetHealthCard />
           <EnergyConsumptionCard />
           <SiteAvailabilityCard />
           <KpiBanner />
         </div>
 
-        <div className="p-[15px] flex flex-col gap-[15px]">
+        <div className="p-5 flex flex-col gap-[15px]">
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-2">
               <span className="text-[13px] font-bold text-gray-800">Plant Metrics ({plantCards.length})</span>

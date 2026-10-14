@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import type { MonitorAsset, MonitorTask } from '../data/assetMonitor'
+import { priorityMatrixColors } from '../data/overview'
 import { IncidentPopup, type IncidentItem } from './IncidentPopup'
 import { TaskDetailPopup } from './TasksPopup'
 
@@ -26,9 +27,9 @@ const priorityFilters = [
 ]
 
 const severityColor: Record<string, string> = {
-  high: 'rgb(220, 18, 10)',
-  medium: 'rgb(255, 147, 56)',
-  low: 'rgb(255, 213, 66)',
+  high: priorityMatrixColors.high,
+  medium: priorityMatrixColors.medium,
+  low: priorityMatrixColors.low,
 }
 
 interface Alert {

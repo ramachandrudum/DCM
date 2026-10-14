@@ -74,13 +74,32 @@ export default function App() {
   const themeStyle = {
     '--theme-primary': activeTheme.primary,
     '--theme-accent': activeTheme.accent,
-    '--theme-navigation': theme ? `color-mix(in srgb, ${activeTheme.primary} 18%, #0f172a 82%)` : '#121212',
+    '--theme-navigation': activeTheme.navigation ?? (theme ? `color-mix(in srgb, ${activeTheme.primary} 18%, #0f172a 82%)` : '#121212'),
+    '--theme-navigation-active': activeTheme.navigationActive ?? activeTheme.primary,
     '--theme-background': activeBackground,
     '--theme-card': activeCard,
     '--theme-on-primary': getReadableTextColor(activeTheme.primary),
     '--bg-main': activeBackground,
     '--bg-header': activeHeader,
     '--theme-surface-header': activeHeader,
+    '--theme-surface-hover': `color-mix(in srgb, ${activeCard} 65%, ${activeBackground} 35%)`,
+    ...(themeMatchesMode && activeTheme.text ? { '--theme-text': activeTheme.text } : {}),
+    ...(themeMatchesMode && activeTheme.muted ? { '--theme-muted': activeTheme.muted } : {}),
+    ...(themeMatchesMode && activeTheme.border ? { '--theme-border': activeTheme.border } : {}),
+    ...(themeMatchesMode && activeTheme.status
+      ? {
+          '--status-critical-text': activeTheme.status.critical,
+          '--status-warning-text': activeTheme.status.warning,
+          '--status-deviation-text': activeTheme.status.deviation,
+          '--status-healthy-text': activeTheme.status.healthy,
+          '--status-info-text': activeTheme.status.info,
+          '--status-critical-surface': `color-mix(in srgb, ${activeTheme.status.critical} 14%, ${activeCard})`,
+          '--status-warning-surface': `color-mix(in srgb, ${activeTheme.status.warning} 14%, ${activeCard})`,
+          '--status-deviation-surface': `color-mix(in srgb, ${activeTheme.status.deviation} 14%, ${activeCard})`,
+          '--status-healthy-surface': `color-mix(in srgb, ${activeTheme.status.healthy} 14%, ${activeCard})`,
+          '--status-info-surface': `color-mix(in srgb, ${activeTheme.status.info} 14%, ${activeCard})`,
+        }
+      : {}),
   } as CSSProperties
 
   const currentCustomer = customers.find((c) => c.id === activeCustomer)

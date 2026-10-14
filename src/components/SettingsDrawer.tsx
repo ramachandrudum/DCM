@@ -365,7 +365,7 @@ export default function SettingsDrawer({
             </div>
 
             <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--theme-muted)]">Preset Themes</p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--theme-muted)]">Themes</p>
               <div className="grid grid-cols-2 gap-3">
                 {themePresets.map((preset) => {
                   const isActive = theme?.id === preset.id

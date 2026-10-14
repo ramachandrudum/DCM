@@ -157,16 +157,22 @@ export const assetsHealth = {
   availabilityDelta: 1.2,
 }
 
+export const priorityMatrixColors = {
+  high: '#DC120A',
+  medium: '#FF9338',
+  low: '#FFD542',
+}
+
 export const healthLegend = [
-  { label: 'Healthy', value: 72, color: '#10B981' },
-  { label: 'At Risk', value: 12, color: '#EF4444' },
-  { label: 'In Review', value: 6, color: '#F59E0B' },
+  { label: 'Healthy', value: 72, color: '#28A745' },
+  { label: 'At Risk', value: 12, color: priorityMatrixColors.high },
+  { label: 'In Review', value: 6, color: priorityMatrixColors.medium },
 ]
 
 export const energyMix = [
   { label: 'Carbide', value: 52, color: '#2563EB' },
-  { label: 'PVC', value: 28, color: '#10B981' },
-  { label: 'Caustic', value: 20, color: '#F59E0B' },
+  { label: 'PVC', value: 28, color: '#28A745' },
+  { label: 'Caustic', value: 20, color: priorityMatrixColors.medium },
 ]
 
 export const energyTrends: Record<'power' | 'specific', number[]> = {

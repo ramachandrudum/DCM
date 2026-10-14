@@ -55,7 +55,7 @@ function RailButton({ item, active, onClick, buGradient }: { item: RailItem; act
       onClick={onClick}
       className={`group relative rail-item w-full flex flex-col items-center justify-center gap-[3px] transition-all cursor-pointer mb-[15px] overflow-visible pt-[10px] pb-[10px] ${
         showBlueBg
-          ? 'rounded-[10px] bg-[var(--theme-primary)]'
+          ? 'rounded-[10px] bg-[var(--theme-navigation-active,var(--theme-primary))]'
           : active
             ? 'rounded-[10px]'
             : 'text-white/70 hover:text-white hover:bg-white/10'

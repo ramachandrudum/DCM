@@ -1,3 +1,11 @@
+export type ThemeStatusColors = {
+  critical: string
+  warning: string
+  deviation: string
+  healthy: string
+  info: string
+}
+
 export type ThemeConfig = {
   id: string
   label: string
@@ -6,6 +14,12 @@ export type ThemeConfig = {
   background: string
   card: string
   dark: boolean
+  text?: string
+  muted?: string
+  border?: string
+  navigation?: string
+  navigationActive?: string
+  status?: ThemeStatusColors
 }
 
 export const defaultTheme: ThemeConfig = {
@@ -72,5 +86,47 @@ export const themePresets: ThemeConfig[] = [
     background: '#0f172a',
     card: '#1e293b',
     dark: true,
+  },
+  {
+    id: 'pulse-light',
+    label: 'Pulse Light',
+    primary: '#EE3124',
+    accent: '#1890FF',
+    background: '#F8F9FA',
+    card: '#FFFFFF',
+    dark: false,
+    text: '#101828',
+    muted: '#6C757D',
+    border: '#DEE2E6',
+    navigation: '#1E1E1E',
+    navigationActive: '#135DFB',
+    status: {
+      critical: '#D92D20',
+      warning: '#F79009',
+      deviation: '#FFC107',
+      healthy: '#12B76A',
+      info: '#1890FF',
+    },
+  },
+  {
+    id: 'pulse-dark',
+    label: 'Pulse Dark',
+    primary: '#EE3124',
+    accent: '#00A3FF',
+    background: '#121212',
+    card: '#242424',
+    dark: true,
+    text: '#F2F4F7',
+    muted: '#98A2B3',
+    border: '#383838',
+    navigation: '#242424',
+    navigationActive: '#135DFB',
+    status: {
+      critical: '#F04438',
+      warning: '#FB923C',
+      deviation: '#F59E0B',
+      healthy: '#34D399',
+      info: '#00A3FF',
+    },
   },
 ]
