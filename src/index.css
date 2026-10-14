@@ -5,15 +5,15 @@
 
 :root {
   --font-lato: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  --rm: #dc3545;
-  --gm: #006D4E;
-  --aym: #FFB900;
-  --am: #fd7e14;
+  --rm: #DC3545;
+  --gm: #28A745;
+  --aym: #FFC008;
+  --am: #FD7E14;
   --tt: #6B7280;
   --accent: #2563EB;
   --bl: #0968db;
-  --r: #dc3545;
-  --g: #1C9A5B;
+  --r: #DC3545;
+  --g: #28A745;
   --bd: var(--theme-border);
   --bg-dark: #121212;
   --bg-main: #F8FAFC;
