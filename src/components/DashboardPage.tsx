@@ -825,7 +825,7 @@ function OverviewTab({ onSelectAsset, onNavigatePath, edgeCase }: { onSelectAsse
         />
       )}
       {activityTask && <TaskOverlay task={activityTask} onClose={() => setActivityTask(null)} />}
-      <div className={`w-full ${edgeCase ? '' : 'max-w-[1060px] mx-auto'} flex flex-col gap-[15px] shrink-0 grow`}>
+      <div className={`w-full flex flex-col gap-[15px] shrink-0 grow`}>
         {edgeCase ? (
           <EdgeCaseOverview />
         ) : (
