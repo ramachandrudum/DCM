@@ -89,7 +89,7 @@ export default function Header({ customer, persona, profileImage, onOpenAICopilo
   )
 
   return (
-    <header className="h-[50px] border-b border-gray-200 bg-[var(--bg-header)] flex items-center justify-between px-4 shrink-0 z-50 shadow-sm">
+    <header className="h-[50px] border-b border-gray-200 bg-[var(--bg-header)] flex items-center justify-between px-4 shrink-0 z-50 shadow-sm" style={{background: 'var(--bg-header)', borderColor: 'var(--theme-border)'}}>
       <div className="flex items-center gap-6 flex-1 min-w-0">
         <div className="flex items-center gap-4 min-w-0">
           {buIconVisible && (
@@ -117,7 +117,7 @@ export default function Header({ customer, persona, profileImage, onOpenAICopilo
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <div className="hidden lg:flex items-center gap-2 bg-[var(--theme-card)] border border-gray-200 rounded-lg px-2.5 py-1.5 w-[240px] focus-within:border-blue-400 transition-colors">
+        <div className="hidden lg:flex items-center gap-2 bg-[var(--theme-card)] border border-gray-200 rounded-lg px-2.5 py-1.5 w-[240px] focus-within:border-blue-400 transition-colors dark-onyx:bg-[#090d16] dark-onyx:border-[#373737]" id="top-search">
           <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
           <input
             value={siteQuery}

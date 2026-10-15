@@ -85,7 +85,7 @@ function RailButton({ item, active, onClick, buGradient }: { item: RailItem; act
       )}
       <span className={`text-[8px] font-medium leading-none truncate w-full px-0.5 text-center uppercase tracking-wide pt-[5px] ${
         showBlueBg
-          ? 'theme-on-primary-text'
+          ? 'text-white'
           : active
             ? 'theme-primary-text'
             : 'text-white/70'

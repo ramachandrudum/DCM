@@ -495,7 +495,7 @@ export default function HomeOverview({ onOpenSite, edgeCase = false }: { onOpenS
         <div className="relative w-full">
           <PlantMapHero />
 
-          <div className="absolute inset-x-0 top-0 p-[15px] z-20 bg-gradient-to-b from-black/85 via-black/50 to-transparent">
+          <div className="absolute inset-x-0 top-0 p-[15px] z-20 bg-gradient-to-b from-black/85 via-black/50 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent">
             <Toolbar />
           </div>
         </div>
