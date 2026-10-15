@@ -184,10 +184,6 @@ export default function App() {
     setDark(nextTheme.dark)
   }
 
-  const handleResetTheme = () => {
-    setTheme(null)
-  }
-
   return (
     <div
       className={`theme-root flex flex-col h-screen bg-[var(--bg-main)] overflow-hidden ${dark ? 'dark' : ''}`}
@@ -341,7 +337,6 @@ export default function App() {
           selectedUnitPath={selectedUnitPath}
           onToggleDark={() => setDark((d) => !d)}
           onThemeChange={handleThemeChange}
-          onResetTheme={handleResetTheme}
           onProfileImageChange={setProfileImage}
         />
       </div>

@@ -500,7 +500,7 @@ export default function HomeOverview({ onOpenSite, edgeCase = false }: { onOpenS
           </div>
         </div>
 
-        <div className="relative z-30 px-5 -mt-[25px] flex flex-nowrap items-stretch gap-[15px]">
+        <div className="relative z-50 px-5 -mt-[25px] flex flex-nowrap items-stretch gap-[15px]">
           <AssetHealthCard />
           <EnergyConsumptionCard />
           <SiteAvailabilityCard />

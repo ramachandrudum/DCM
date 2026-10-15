@@ -19,19 +19,7 @@ import {
 import { useEffect, useState, type ChangeEvent } from 'react'
 import type { Customer } from '../data/dashboard'
 import type { Persona } from '../data/personas'
-import { defaultTheme, themePresets, type ThemeConfig } from '../data/themes'
-
-type CustomColors = Pick<ThemeConfig, 'primary' | 'accent' | 'background' | 'card'>
-
-const toColors = (value: ThemeConfig | null): CustomColors => {
-  const source = value ?? defaultTheme
-  return {
-    primary: source.primary,
-    accent: source.accent,
-    background: source.background,
-    card: source.card,
-  }
-}
+import { themePresets, type ThemeConfig } from '../data/themes'
 
 type AccessDetail = {
   label: string
@@ -52,16 +40,8 @@ type Props = {
   selectedUnitPath: string[]
   onToggleDark: () => void
   onThemeChange: (theme: ThemeConfig) => void
-  onResetTheme: () => void
   onProfileImageChange: (image: string | undefined) => void
 }
-
-const colorFields: { key: keyof CustomColors; label: string }[] = [
-  { key: 'primary', label: 'Primary Color' },
-  { key: 'accent', label: 'Accent Color' },
-  { key: 'background', label: 'Background Color' },
-  { key: 'card', label: 'Card Background' },
-]
 
 function getRoleLabel(persona: Persona) {
   if (persona.type === 'external') {
@@ -85,10 +65,8 @@ export default function SettingsDrawer({
   selectedUnitPath,
   onToggleDark,
   onThemeChange,
-  onResetTheme,
   onProfileImageChange,
 }: Props) {
-  const [customColors, setCustomColors] = useState<CustomColors>(() => toColors(theme))
   const [photoError, setPhotoError] = useState('')
 
   useEffect(() => {
@@ -145,42 +123,9 @@ export default function SettingsDrawer({
     reader.readAsDataURL(file)
   }
 
-  const updateCustomColor = (key: keyof CustomColors, value: string) => {
-    setCustomColors((colors) => ({ ...colors, [key]: value }))
-  }
-
   const applyPreset = (preset: ThemeConfig) => {
-    setCustomColors({
-      primary: preset.primary,
-      accent: preset.accent,
-      background: preset.background,
-      card: preset.card,
-    })
     onThemeChange(preset)
   }
-
-  const applyCustomTheme = () => {
-    onThemeChange({
-      id: 'custom',
-      label: 'Custom theme',
-      ...customColors,
-      dark,
-    })
-  }
-
-  const resetToDefault = () => {
-    setCustomColors(toColors(null))
-    onResetTheme()
-  }
-
-  const appliedColors = toColors(theme)
-  const isDefaultTheme = theme === null
-  const isDirty =
-    appliedColors.primary !== customColors.primary ||
-    appliedColors.accent !== customColors.accent ||
-    appliedColors.background !== customColors.background ||
-    appliedColors.card !== customColors.card
-  const canReset = !isDefaultTheme || isDirty
 
   return (
     <div
@@ -393,52 +338,6 @@ export default function SettingsDrawer({
                   )
                 })}
               </div>
-            </div>
-
-            <div className="mt-6 space-y-4 border-t theme-border pt-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--theme-muted)]">Custom Theme Builder</p>
-              <div className="grid grid-cols-2 gap-4">
-                {colorFields.map((field) => (
-                  <div key={field.key}>
-                    <span className="mb-1 block text-xs font-medium text-[var(--theme-text)]">{field.label}</span>
-                    <div className="flex items-center gap-2 rounded-lg border theme-border p-1.5">
-                      <input
-                        type="color"
-                        value={customColors[field.key]}
-                        onChange={(event) => updateCustomColor(field.key, event.target.value)}
-                        className="h-8 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
-                        aria-label={field.label}
-                      />
-                      <span className="font-mono text-xs uppercase text-[var(--theme-muted)]">{customColors[field.key]}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={resetToDefault}
-                  disabled={!canReset}
-                  className="rounded-xl border theme-border py-2.5 text-sm font-semibold text-[var(--theme-text)] transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-white/5"
-                >
-                  Reset to Default
-                </button>
-                <button
-                  type="button"
-                  onClick={applyCustomTheme}
-                  disabled={!isDirty}
-                  className="rounded-xl bg-[var(--theme-primary)] py-2.5 text-sm font-semibold theme-on-primary-text shadow-md transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Save
-                </button>
-              </div>
-              <p className="text-[11px] text-[var(--theme-muted)]">
-                {isDirty
-                  ? 'Unsaved changes — select Save to apply them.'
-                  : isDefaultTheme
-                    ? 'Default app theme is active. Custom colors apply only after you save.'
-                    : `Applying the “${theme?.label}” theme. Saved colors will replace it.`}
-              </p>
             </div>
           </section>
         </div>

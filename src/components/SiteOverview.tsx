@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import {
   SITE_PALETTE,
   incidentChart,
@@ -11,20 +12,25 @@ import {
   unitKpiStatus,
   type KpiPoint,
   type SiteIncidentSeverity,
-  type TaskPriority,
 } from '../data/siteOverview'
 
-const SEVERITY_COLOR: Record<SiteIncidentSeverity, string> = {
-  Critical: SITE_PALETTE.red,
-  Warning: SITE_PALETTE.orange,
-  Deviation: SITE_PALETTE.yellow,
+const SEVERITY_BADGE: Record<SiteIncidentSeverity, { bg: string; fg: string; soft: string; textVar: string }> = {
+  Critical: { bg: SITE_PALETTE.red, fg: '#ffffff', soft: 'theme-status-critical-soft theme-status-critical-text', textVar: 'var(--status-critical-text)' },
+  Warning: { bg: SITE_PALETTE.orange, fg: '#ffffff', soft: 'theme-status-warning-soft theme-status-warning-text', textVar: 'var(--status-warning-text)' },
+  Deviation: { bg: '#FFD542', fg: '#000000', soft: 'theme-status-deviation-soft theme-status-deviation-text', textVar: 'var(--status-deviation-text)' },
 }
 
-const PRIORITY_STYLE: Record<TaskPriority, { bg: string; color: string; label: string }> = {
-  HIGH: { bg: SITE_PALETTE.red, color: '#ffffff', label: 'HIGH' },
-  MEDIUM: { bg: SITE_PALETTE.orange, color: '#ffffff', label: 'MEDIUM' },
-  LOW: { bg: '#E3EDF1', color: '#6B7280', label: '--' },
-}
+const maskIcon = (src: string, color: string): CSSProperties => ({
+  background: color,
+  WebkitMaskImage: `url(${src})`,
+  maskImage: `url(${src})`,
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskSize: 'contain',
+  maskSize: 'contain',
+  WebkitMaskPosition: 'center',
+  maskPosition: 'center',
+})
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
@@ -38,10 +44,10 @@ function PanelTitle({ children }: { children: React.ReactNode }) {
   return <div className="text-center text-[13px] font-bold text-gray-800 py-3 shrink-0">{children}</div>
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
+function Stat({ value, label, emphasis }: { value: number; label: string; emphasis?: boolean }) {
   return (
-    <div className="flex flex-col items-center" style={{ width: 60 }}>
-      <span className="text-[26px] font-bold leading-none text-gray-900">{value}</span>
+    <div className="flex flex-1 flex-col items-center">
+      <span className={`font-bold leading-none text-gray-900 ${emphasis ? 'text-[32px]' : 'text-[26px]'}`}>{value}</span>
       <span className="text-[11px] font-medium text-gray-500 mt-1">{label}</span>
     </div>
   )
@@ -80,8 +86,8 @@ function KpiStatusPanel({ onViewAllAssets }: { onViewAllAssets: () => void }) {
   return (
     <Panel>
       <PanelTitle>KPI Status</PanelTitle>
-      <div className="flex items-center justify-center gap-1 pb-3 shrink-0">
-        <Stat value={siteKpiTotals.total} label="Total" />
+      <div className="flex items-center gap-1 pb-3 shrink-0">
+        <Stat value={siteKpiTotals.total} label="Total" emphasis />
         <Stat value={siteKpiTotals.unhealthy} label="Unhealthy" />
         <Stat value={siteKpiTotals.healthy} label="Healthy" />
       </div>
@@ -203,38 +209,56 @@ function IncidentsPanel({ onViewAll }: { onViewAll: () => void }) {
       <div className="px-2 shrink-0">
         <IncidentChart />
       </div>
-      <div className="border-t border-gray-100 mt-2 pt-2 px-3 flex-1 min-h-0 flex flex-col">
-        <div className="flex items-center justify-between shrink-0 pb-1">
+      <div className="border-t border-gray-100 mt-2 pt-2 flex-1 min-h-0 flex flex-col">
+        <div className="flex items-center justify-between shrink-0 pb-1 px-3">
           <span className="text-[12px] font-bold text-gray-800">Recent incidents</span>
           <button onClick={onViewAll} className="text-[11px] font-semibold text-blue-600 hover:underline">
             View all
           </button>
         </div>
-        <div className="overflow-y-auto scrollbar-thin flex flex-col gap-2 pb-2 min-h-0">
-          {siteIncidents.map((inc) => (
-            <div key={inc.id} className="border border-gray-200 rounded-md p-2.5 flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-gray-400">{inc.time}</span>
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide text-white"
-                  style={{ background: SEVERITY_COLOR[inc.severity] }}
-                >
-                  {inc.severity}
-                </span>
+        <div className="overflow-y-auto scrollbar-thin min-h-0 pb-2">
+          {siteIncidents.map((inc) => {
+            const badge = SEVERITY_BADGE[inc.severity]
+            return (
+              <div
+                key={inc.id}
+                role="button"
+                tabIndex={0}
+                className="px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${badge.soft}`}>
+                    <span className="w-[13px] h-[13px] shrink-0 transition-all opacity-70 group-hover:opacity-100" style={maskIcon('/incidents.svg', badge.textVar)} />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[10px] text-gray-400">{inc.time}</div>
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shrink-0 ${inc.severity === 'Deviation' ? 'theme-status-deviation-badge' : ''}`}
+                        style={{ backgroundColor: badge.bg, color: badge.fg }}
+                      >
+                        {inc.severity.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="text-[12px] font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{inc.title}</div>
+                    </div>
+                    <div className="text-[11px] text-gray-500 truncate">
+                      <span>{inc.tag}</span>
+                      <span className="ml-1 text-amber-500 font-medium">{inc.value}</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500 transition-colors shrink-0" />
+                </div>
+                <div className="mt-2">
+                  <div className="text-[11px] text-gray-500 truncate">
+                    <span>{inc.unit}</span>
+                    <span><span className="text-gray-400 mx-0.5">&gt;</span>{inc.asset}</span>
+                  </div>
+                </div>
               </div>
-              <div className="text-[12px] font-semibold text-gray-800 leading-snug">{inc.title}</div>
-              <div className="flex items-center gap-3 text-[10px] text-gray-500">
-                <span className="truncate">{inc.unit}</span>
-                <span className="truncate">{inc.asset}</span>
-              </div>
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="text-gray-500">{inc.tag}</span>
-                <span className="font-bold" style={{ color: SITE_PALETTE.red }}>
-                  {inc.value}
-                </span>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </Panel>
@@ -288,41 +312,41 @@ function TasksPanel({ onViewAll }: { onViewAll: () => void }) {
           <LegendItem color={SITE_PALETTE.green} label="Completed" value={siteTaskSummary.completed} />
         </div>
       </div>
-      <div className="border-t border-gray-100 mt-2 pt-2 px-3 flex-1 min-h-0 flex flex-col">
-        <div className="flex items-center justify-between shrink-0 pb-1">
+      <div className="border-t border-gray-100 mt-2 pt-2 flex-1 min-h-0 flex flex-col">
+        <div className="flex items-center justify-between shrink-0 pb-1 px-3">
           <span className="text-[12px] font-bold text-gray-800">Task list</span>
           <button onClick={onViewAll} className="text-[11px] font-semibold text-blue-600 hover:underline">
             View all
           </button>
         </div>
-        <div className="overflow-y-auto scrollbar-thin flex flex-col gap-2 pb-2 min-h-0">
-          {siteTasks.map((task) => {
-            const style = PRIORITY_STYLE[task.priority]
-            return (
-              <div key={task.id} className="border border-gray-200 rounded-md p-2.5 flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-gray-500">Task</span>
-                  <span className="text-[10px] text-gray-400">{task.date}</span>
+        <div className="overflow-y-auto scrollbar-thin min-h-0 pb-2">
+          {siteTasks.map((task) => (
+            <div
+              key={task.id}
+              role="button"
+              tabIndex={0}
+              className="px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 theme-status-healthy-soft theme-status-healthy-text">
+                  <span className="w-[13px] h-[13px] shrink-0 transition-all opacity-70 group-hover:opacity-100" style={maskIcon('/Tasks.svg', 'var(--status-healthy-text)')} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center">
+                    <div className="text-[12px] font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{task.title}</div>
+                  </div>
+                  <div className="text-[11px] text-gray-500 truncate">{task.date}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
-                    style={{ background: style.bg, color: style.color }}
-                  >
-                    {style.label}
-                  </span>
-                  <span className="text-[12px] font-semibold text-gray-800 truncate">{task.title}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 text-[8px] font-bold text-gray-600 shrink-0">
-                    {task.initials}
-                  </span>
-                  <span className="text-[10px] text-gray-500 truncate">{task.activity}</span>
-                </div>
-                <div className="text-[10px] text-gray-500">Unit: {task.unit}</div>
+                <span className="w-6 h-6 rounded-full bg-[#5B5FC7] text-white text-[10px] font-bold flex items-center justify-center shrink-0">{task.initials}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500 transition-colors shrink-0" />
               </div>
-            )
-          })}
+              <div className="mt-2">
+                <div className="text-[11px] text-gray-500 truncate">
+                  <span>{task.unit}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </Panel>

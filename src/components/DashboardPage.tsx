@@ -118,7 +118,7 @@ function TreeBranch({
         >
           {isAsset && <Dot status={node.status ?? 'off'} />}
           <span
-            className={`flex-1 min-w-0 truncate ${isSystem ? 'uppercase font-semibold' : ''}`}
+            className={`flex-1 min-w-0 truncate ${isSystem ? 'font-semibold' : ''}`}
             style={isSystem ? { fontSize: 10 } : undefined}
           >
             {node.name}
